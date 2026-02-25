@@ -1,0 +1,11 @@
+* @thesis-web
+
+/apps/identity-without-disclosure/ @thesis-web
+/apps/intent-file-router/ @thesis-web
+/apps/lottery-fairness-sim/ @thesis-web
+/apps/orbital-node-sizing-50kw/ @thesis-web
+/apps/safe-agent-pipeline/ @thesis-web
+/apps/micro-backend-showcase/ @thesis-web
+
+/packages/ @thesis-web
+/docs/ @thesis-web

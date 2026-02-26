@@ -10,3 +10,6 @@ coverage/
 
 # editor/backup files
 *.bak
+
+# editor backup files
+*.bak

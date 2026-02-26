@@ -8,6 +8,7 @@
 **Demo slug:** `/lab/intent-file-router`  
 **Demo static path:** `/demos/intent-file-router/`  
 **Primary alignment sources:**
+
 - `docs/exnulla-demo-blueprint-intent-file-router.md` (behavior + UX blueprint)
 - `docs/engineering-specs-1-0-1.md` (site architecture + demo tier rules)
 
@@ -16,6 +17,7 @@
 ## 0) Scope and non-goals
 
 ### In scope
+
 - A client-side simulator that:
   - parses a line-1 `TARGET` header in **3 comment syntaxes**
   - validates repo keys + paths with safety rules
@@ -23,10 +25,11 @@
   - emits a deterministic route plan (dry-run)
   - renders a 3-pane UX (Input / Router Output / Audit+Diff)
   - includes a “repo hygiene guard” mini-panel simulation
-- Build and integration into `exnulla-site` so the demo is served under `/demos/intent-file-router/` and embedded via `/lab/intent-file-router`.
+- Build and integration into `exnulla-demos` so the demo is served under `/demos/intent-file-router/` and embedded via `/lab/intent-file-router`.
 - Table-driven unit tests for parser + validator + payload builder + determinism.
 
 ### Explicit non-goals
+
 - No real SSH/SCP, no network, no filesystem writes outside browser memory.
 - No loading arbitrary user files beyond a small capped text input.
 - No auth, no persistence, no backend dependency.
@@ -36,6 +39,7 @@
 ## 1) Product requirements
 
 ### 1.1 Core behavior (must match blueprint intent)
+
 1. **Explicit opt-in**: routable only if line 1 is a supported `TARGET` header.
 2. **Header stripping**: routing metadata never lands in payload.
 3. **Deterministic output**: same inputs → same `(repoKey, pathInRepo, payloadSha, dest)`.
@@ -48,26 +52,30 @@
 5. **Repo hygiene guard**: detect and flag line-1 TARGET headers (simulated scan input).
 
 ### 1.2 UX requirements
+
 - Three-pane layout:
   - **Input**: filename, contents textarea, toggles, example loader.
   - **Router Output**: parsed header, destination preview, action plan steps.
   - **Audit + Diff**: audit timeline + header-stripped preview.
 - “Wow” affordances:
   - determinism badge showing `payload_sha256` and `route_id`
-  - shareable permalink encoding *example id + toggles + filename* (not full content)
+  - shareable permalink encoding _example id + toggles + filename_ (not full content)
 
 ### 1.3 Accessibility
+
 - Keyboard reachable controls.
 - Visible focus states.
 - `aria-live="polite"` for validation summaries.
 - No color-only signaling (add icons/labels).
 
 ### 1.4 Performance
+
 - Hard cap input size: **256 KiB** (post-normalization).
 - Rendering must remain responsive for max input (avoid expensive diffing; show line previews only).
 - All computation in main thread is acceptable; keep operations linear-time.
 
 ### 1.5 Security
+
 - Strictly local execution.
 - No `eval`.
 - No external network calls.
@@ -77,10 +85,10 @@
 
 ## 2) Repository / directory layout
 
-### 2.1 Target layout inside `exnulla-site`
+### 2.1 Target layout inside `exnulla-demos`
 
 ```
-exnulla-site/
+exnulla-demos/
   demos/
     intent-file-router/
       package.json
@@ -127,6 +135,7 @@ exnulla-site/
 ```
 
 Notes:
+
 - Demo can be React or vanilla TS; React is recommended for clean pane composition.
 - Styling: plain CSS (no dependency on Tailwind required). Keep it deterministic.
 
@@ -138,6 +147,7 @@ site/public/demos/intent-file-router/   (copied from demo dist during build)
 ```
 
 The lab page should embed:
+
 - an iframe pointing to `/demos/intent-file-router/index.html`
 - a small metadata card that reads `/demos/intent-file-router/meta.json`
 
@@ -146,6 +156,7 @@ The lab page should embed:
 ## 3) Configuration (demo-local)
 
 ### 3.1 Repo map (display-only)
+
 Hardcode a map mirroring real script keys:
 
 ```ts
@@ -161,6 +172,7 @@ export const REPO_MAP: Record<string, string> = {
 ```
 
 ### 3.2 Denylist extensions
+
 Default denylist (case-insensitive):
 
 ```
@@ -170,7 +182,9 @@ Default denylist (case-insensitive):
 Allow users to “force treat as binary/media” for demonstration only; forced binary must still refuse routing.
 
 ### 3.3 Policies
+
 Represent policies as enums:
+
 - `conflictPolicy`: `overwrite | skip` (default: `skip`)
 - `afterPolicy`: `move | delete | keep` (default: `keep`)
 
@@ -186,9 +200,9 @@ export type HeaderFormat = "slash" | "hash" | "html";
 export type TargetSpec = {
   repoKey: string;
   pathInRepo: string;
-  raw: string;          // original header remainder (after TARGET:)
+  raw: string; // original header remainder (after TARGET:)
   format: HeaderFormat;
-  line1: string;        // full original line 1
+  line1: string; // full original line 1
 };
 
 export type ValidationSeverity = "error" | "warn";
@@ -268,12 +282,14 @@ export type AppState = {
 ## 5) Algorithms and rules
 
 ### 5.1 Normalization
+
 - If `normalizeCrlf`:
   - replace `\r\n` with `\n`
   - also strip trailing `\r` at end-of-line
 - Preserve original for preview but compute payload and sha from normalized.
 
 ### 5.2 Binary detection
+
 - If `forceBinary` is set: treat as binary.
 - Else: if normalized content contains `\x00` (null byte) → binary.
 - Binary inputs are **not routable** and must emit `BINARY_DETECTED` error.
@@ -281,11 +297,13 @@ export type AppState = {
 ### 5.3 Header parsing (line 1 only)
 
 Supported line-1 forms:
+
 - `// TARGET: <repo_key> <path>`
 - `# TARGET: <repo_key> <path>`
 - `<!-- TARGET: <repo_key> <path> -->`
 
 Parsing steps:
+
 1. Determine `line1` = first line of normalized content (split on `\n`).
 2. Try match regexes (in order):
    - `^\s*//\s*TARGET:\s+(.+)$`
@@ -300,7 +318,9 @@ Parsing steps:
 Important: do **not** attempt to parse TARGET beyond line 1.
 
 ### 5.4 Path validation
+
 Rules:
+
 - empty → `EMPTY_PATH` error
 - begins with `/` → `ABSOLUTE_PATH` error
 - contains `..` as a segment (split on `/`) → `PATH_TRAVERSAL` error
@@ -308,21 +328,26 @@ Rules:
   - Recommended: normalize + warn (more user-friendly).
 
 ### 5.5 Filename denylist
+
 - Extension check uses `filename` input.
 - If extension in denylist → `DENYLIST_EXTENSION` error.
 
 ### 5.6 Payload build
+
 - Payload is content with line 1 removed.
   - If content is a single line only, payload is empty string.
 - Preserve exact payload bytes as the post-normalization remainder.
 
 ### 5.7 Route plan computation
+
 Given `TargetSpec` and policies:
+
 - `remoteRepoRoot = REPO_MAP[repoKey]`
 - `remoteDest = remoteRepoRoot + "/" + pathInRepo`
 - `remoteDir = remoteDest up to last '/'` (if none, remoteRepoRoot)
 
 Steps (dry-run display):
+
 1. `mkdir -p <remoteDir>`
 2. Upload step:
    - If `conflictPolicy=skip`: show `scp <payload> <remoteDest>  # if missing` and note that existing dest would skip.
@@ -333,11 +358,14 @@ Steps (dry-run display):
    - move: `mv <local> <local_routed_dir>` (simulated)
 
 ### 5.8 Determinism outputs
+
 Compute:
+
 - `payloadSha256Hex` using Web Crypto (`crypto.subtle.digest('SHA-256', ...)`) over UTF-8 bytes of payload.
 - `routeId = sha256("${repoKey}|${pathInRepo}|${payloadSha256Hex}")` (hex).
 
 Show a badge:
+
 - `payload_sha256: <first12>…`
 - `route_id: <first12>…`
 
@@ -348,6 +376,7 @@ Show a badge:
 ### 6.1 Pane responsibilities
 
 #### InputPane
+
 - Inputs:
   - filename (default: `draft.md`)
   - textarea for content
@@ -356,9 +385,10 @@ Show a badge:
   - buttons: Simulate Route, Reset, Load Example
 - Behavior:
   - Simulate triggers the full pipeline and populates Output/Audit.
-  - Content edits should *not* auto-run simulation (avoid expensive loops); optionally add “Auto-simulate” toggle off by default.
+  - Content edits should _not_ auto-run simulation (avoid expensive loops); optionally add “Auto-simulate” toggle off by default.
 
 #### OutputPane
+
 - Displays:
   - parsed header summary or parse failure
   - destination preview (repo root + full dest)
@@ -366,6 +396,7 @@ Show a badge:
   - issues list (errors/warnings)
 
 #### AuditDiffPane
+
 - Audit timeline list (most recent last)
 - Preview blocks:
   - Original first 5 lines
@@ -373,18 +404,21 @@ Show a badge:
   - Highlight that line 1 was removed (use a small callout)
 
 #### HygieneGuardPanel
+
 - Explains: “no-target-headers.sh fails commits if TARGET is present on line 1.”
 - Provides a simulated scan:
   - textarea where each line is `path | first_line`
   - parse and flag any line where first_line matches a TARGET header
 
 ### 6.2 Error display rules
+
 - If any `error` severity issues exist:
   - do not render a plan
   - still render parsed info if available
 - Warnings do not block plan.
 
 ### 6.3 Visual constraints
+
 - Use CSS grid:
   - desktop: 3 columns
   - narrow screens: stack panes
@@ -407,6 +441,7 @@ export type Sample = {
 ```
 
 Required samples:
+
 - valid JS comment header
 - valid HTML comment header routing JSON
 - invalid: TARGET not on line 1
@@ -419,7 +454,9 @@ Required samples:
 ## 8) Test plan (table-driven)
 
 ### 8.1 Parser tests (`parse.test.ts`)
+
 Cases:
+
 - each header format parses correctly
 - whitespace tolerance (leading spaces)
 - CRLF line ending on header line
@@ -427,7 +464,9 @@ Cases:
 - target not on line 1 returns null (and validation path for TARGET_NOT_LINE1 is handled at UX/sample level if you choose to detect it)
 
 ### 8.2 Validation tests (`validate.test.ts`)
+
 Cases:
+
 - unknown repo key
 - empty path
 - absolute path
@@ -438,15 +477,18 @@ Cases:
 - size cap (257KiB)
 
 ### 8.3 Payload tests (`payload.test.ts`)
+
 - line 1 removal
 - single-line file → empty payload
 - CRLF normalized
 
 ### 8.4 Plan tests (`plan.test.ts`)
+
 - correct remoteDest/remoteDir
 - step rendering differs by conflictPolicy + afterPolicy
 
 ### 8.5 Determinism tests (`determinism.test.ts`)
+
 - stable `payloadSha` for same payload
 - stable `routeId` for same tuple
 
@@ -455,12 +497,14 @@ Cases:
 ## 9) Build + integration
 
 ### 9.1 Demo build (Vite)
+
 - `npm run build` outputs `dist/`.
 - Ensure assets are relative paths (Vite default).
 - Base path:
   - set Vite `base: '/demos/intent-file-router/'` for correct hosting under the site.
 
 ### 9.2 Meta stamping
+
 At demo build, generate `/demos/intent-file-router/dist/meta.json` with:
 
 ```json
@@ -476,21 +520,27 @@ At demo build, generate `/demos/intent-file-router/dist/meta.json` with:
 ```
 
 Implementation notes:
+
 - For determinism, prefer an env-injected `GIT_SHA` (same pattern as site provenance).
 - If not available, set `commit_sha` to `unknown`.
 
 ### 9.3 Copy into Astro public
+
 Add a root orchestration step (preferred):
+
 - `npm run build` at repo root should:
   1. build site
   2. build demos
   3. copy demo dist to `site/public/demos/intent-file-router/`
 
 Copy rule:
+
 - `site/public/demos/intent-file-router/**` replaced atomically within build output.
 
 ### 9.4 Lab page
+
 Create `site/src/pages/lab/intent-file-router.astro`:
+
 - Title, short hook, and embed runner:
   - iframe `src="/demos/intent-file-router/"`
   - include a small “Meta” section that fetches and renders `meta.json`
@@ -500,20 +550,24 @@ Create `site/src/pages/lab/intent-file-router.astro`:
 ## 10) Acceptance criteria
 
 ### Correctness
+
 - Each supported header format parses **only** when on line 1.
 - Header stripping: payload begins at original line 2.
 - Route computation uses `REPO_MAP[repoKey] + '/' + pathInRepo`.
 - Denied/binary inputs are refused with explicit reason codes.
 
 ### Explainability
+
 - Audit log shows the full pipeline steps.
 - Original vs Payload preview makes header removal obvious.
 
 ### Determinism
+
 - Badge shows stable hashes.
 - Re-running Simulate Route without input change yields identical output.
 
 ### Integration
+
 - Demo is served at `/demos/intent-file-router/`.
 - Lab page `/lab/intent-file-router` embeds demo via iframe.
 - Demo does not impact landing bundle size (Tier 2 isolation).

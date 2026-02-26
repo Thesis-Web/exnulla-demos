@@ -237,7 +237,7 @@ A permalink must encode the full demo state:
 
 ```ts
 type DemoState = {
-  tab: 'mining' | 'reward';
+  tab: "mining" | "reward";
   mining: {
     ctx: MiningSeedContextV2;
     params: MiningParamsV2;

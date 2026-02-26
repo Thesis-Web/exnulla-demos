@@ -3,8 +3,8 @@
 **Doc type:** implementation-grade engineering spec (no drift)  
 **Demo ID / slug:** `lottery-fairness-sim`  
 **Tier:** 2 (iframe-isolated static artifact)  
-**Target host repo:** `exnulla-site`  
-**Artifact mount point:** `site/public/demos/lottery-fairness-sim/`  
+**Target host repo:** `exnulla-demos`  
+**Artifact mount point:** `site/public/demos/lottery-fairness-sim/`
 
 ---
 
@@ -74,7 +74,7 @@ This demo must **exactly match** the behavior of the existing selection engines 
 The built demo artifact must end up at:
 
 ```
-exnulla-site/
+exnulla-demos/
   site/public/demos/lottery-fairness-sim/
     index.html
     assets/*
@@ -107,12 +107,12 @@ If the site already generates `/meta/demos.json`, ensure this demo appears there
 
 ## 4) Build strategy (no drift)
 
-### 4.1 Preferred: demo as a first-class Vite app inside `exnulla-site`
+### 4.1 Preferred: demo as a first-class Vite app inside `exnulla-demos`
 
 Create a demo workspace folder:
 
 ```
-exnulla-site/
+exnulla-demos/
   demos/
     lottery-fairness-sim/
       package.json
@@ -171,7 +171,7 @@ Implement the exact rules from the blueprint:
   - `tenure_factor = 1.0`
   - `priority_factor = 1.0`
 
-**Implementation detail:** normalization must occur *before* calling the selection engine so that audit logs reflect the normalized state.
+**Implementation detail:** normalization must occur _before_ calling the selection engine so that audit logs reflect the normalized state.
 
 ### 5.2 Sorting and tie-break rules
 
@@ -243,7 +243,7 @@ Use the blueprint’s conceptual state, but **BigInt fields stored as strings**.
 ```ts
 type DemoState = {
   version: 1;
-  tab: 'mining' | 'reward';
+  tab: "mining" | "reward";
   mining: {
     ctx: MiningSeedContextV2_S;
     params: MiningParamsV2_S;
@@ -498,10 +498,7 @@ Create `demos/lottery-fairness-sim/CHAIN_PIN.json`:
 {
   "repo": "the-thesis-chain-main",
   "sha": "<PINNED_COMMIT_SHA>",
-  "paths": [
-    "src/primitives/lottery/mining",
-    "src/primitives/lottery/reward"
-  ]
+  "paths": ["src/primitives/lottery/mining", "src/primitives/lottery/reward"]
 }
 ```
 
@@ -599,4 +596,3 @@ UI must show:
 - Mining metric: `metric = score_int / multiplier`
 - Reward metric: `metric = score_int / weight_scaled`
 - Tie-break: `metric → score_int → wallet_id`
-

@@ -3,8 +3,8 @@
 **Spec ID:** `exnulla-demo-engineering-spec-micro-backend-1-0-0`  
 **Demo slug:** `micro-backend-showcase`  
 **Tier:** 2 (iframe-isolated Vite artifact)  
-**Shell repo:** `exnulla-site`  
-**Backend source-of-truth:** `thesisweb-backend` (Fastify + SQLite)  
+**Shell repo:** `exnulla-demos`  
+**Backend source-of-truth:** `thesisweb-backend` (Fastify + SQLite)
 
 This spec converts the blueprint (`docs/exnulla-demo-blueprint-micro-backend-showcase.md`) into an implementable build plan. It is written to **avoid disclosing or encouraging any production-sensitive deployment details**: bind backend to localhost, route via same-origin nginx rewrite, and keep demo traffic bounded.
 
@@ -112,14 +112,14 @@ Same-origin rewrite paths exposed by the site’s fronting nginx:
 
 ## 5) Repo Layout & Build Plumbing
 
-### 5.1 Directory structure (in `exnulla-site`)
+### 5.1 Directory structure (in `exnulla-demos`)
 
 Add a **source** folder for the demo and publish its built output into `site/public/demos/...`.
 
 Recommended structure:
 
 ```
-exnulla-site/
+exnulla-demos/
   demos/
     micro-backend-showcase/
       package.json
@@ -156,8 +156,8 @@ Add root-level scripts that can be run locally and in CI:
 
 - `npm run demo:micro-backend:build` (builds the demo and copies output into `site/public/demos/...`)
 - `npm run build` should build:
-  1) demos (or at least this demo)
-  2) site
+  1. demos (or at least this demo)
+  2. site
 
 If you already have a root orchestrator, wire this into it instead of duplicating.
 
@@ -169,9 +169,9 @@ If you already have a root orchestrator, wire this into it instead of duplicatin
 
 Implement a **three-column** layout (collapses to single column on small screens):
 
-1) **Controls**
-2) **Live results**
-3) **Explainer + Inspector**
+1. **Controls**
+2. **Live results**
+3. **Explainer + Inspector**
 
 Keep styling consistent with ExNulla’s minimal black/gray aesthetic. No heavy animations.
 
@@ -376,7 +376,7 @@ Fields:
 }
 ```
 
-If demo code lives inside the `exnulla-site` repo, `gitSha` may reuse the shell’s SHA.
+If demo code lives inside the `exnulla-demos` repo, `gitSha` may reuse the shell’s SHA.
 
 ---
 
@@ -443,17 +443,17 @@ Do **not** expose:
 
 From the demo UI:
 
-1) `valid`, `total=1`
+1. `valid`, `total=1`
    - expect `201` or `200 already`
-2) `invalid_email`
+2. `invalid_email`
    - expect `400` and reason `INVALID_EMAIL`
-3) `extra_property`
+3. `extra_property`
    - expect `400` and reason `SCHEMA_REJECT`
-4) `honeypot_filled`
+4. `honeypot_filled`
    - expect `204` and reason `HONEYPOT`
-5) `duplicate_email`, `total=10`
+5. `duplicate_email`, `total=10`
    - expect at least one `OK_IDEMPOTENT`
-6) `valid`, `total=100`, `concurrency=25`, `delay=0`
+6. `valid`, `total=100`, `concurrency=25`, `delay=0`
    - expect some `RATE_LIMIT`
 
 ### 13.2 Automated smoke checks (recommended)
@@ -507,14 +507,13 @@ Before shipping:
 
 ## 16) Work Plan (Concrete Steps)
 
-1) **Scaffold demo app** under `exnulla-site/demos/micro-backend-showcase` (Vite + TS).
-2) Implement UI shell (3-column) and state model.
-3) Implement deterministic generator (`generator.ts`) and payload builders.
-4) Implement runner with concurrency pool + AbortController.
-5) Implement classification + timeline + aggregates.
-6) Implement inspector + explainer accordions.
-7) Add health polling and offline panel.
-8) Build output into `site/public/demos/micro-backend-showcase/` and add `meta.json`.
-9) Add Lab tile entry and verify iframe load.
-10) Validate acceptance scenarios.
-
+1. **Scaffold demo app** under `exnulla-demos/demos/micro-backend-showcase` (Vite + TS).
+2. Implement UI shell (3-column) and state model.
+3. Implement deterministic generator (`generator.ts`) and payload builders.
+4. Implement runner with concurrency pool + AbortController.
+5. Implement classification + timeline + aggregates.
+6. Implement inspector + explainer accordions.
+7. Add health polling and offline panel.
+8. Build output into `site/public/demos/micro-backend-showcase/` and add `meta.json`.
+9. Add Lab tile entry and verify iframe load.
+10. Validate acceptance scenarios.

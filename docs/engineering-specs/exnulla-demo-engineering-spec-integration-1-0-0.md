@@ -1,4 +1,5 @@
 # Engineering Spec — Demo Integration (Model A: Static Artifact Embedding)
+
 **Project:** `exnulla-site`  
 **Version:** 1.0.0  
 **Source blueprint:** `docs/demo-intergration-blueprint-exnulla-site-1-0-0.md` fileciteturn0file0  
@@ -11,6 +12,7 @@
 ## 0) Constraints and invariants
 
 ### 0.1 Locked architectural decisions
+
 - **Model A is canonical:** demos ship as static artifacts served under `/demos/<slug>/...` and embedded via `<iframe>`.
 - **Astro shell stays static-first:** the shell must not import demo JS.
 - **Deterministic provenance is required:** every prod deploy must expose:
@@ -18,6 +20,7 @@
   - `/meta/demos.json` (new; required)
 
 ### 0.2 Repo-wide operational requirements
+
 - Formatting: `npm run format:check` (Prettier)
 - Markdown lint: `npm run lint:md`
 - Gate: `npm run gate` must stay green (used by `docker-runtime-gate.yml`)
@@ -38,9 +41,11 @@
 ## 2) Directory and URL contracts (hard rules)
 
 ### 2.1 Public directory layout
+
 **Location (in this repo):** `site/public/demos/<slug>/`
 
 **Canonical layout**
+
 ```
 site/public/
   demos/
@@ -55,10 +60,12 @@ site/public/
 ```
 
 ### 2.2 URL contract
+
 - `GET /demos/<slug>/index.html` **must** exist for each enabled demo.
 - All demo assets must resolve relative to `/demos/<slug>/` (no unintended absolute `/` references).
 
 ### 2.3 Placeholder compatibility
+
 Current repo includes placeholder demo folders (e.g., `/demos/attest-pipeline/placeholder/index.html`). This spec introduces an **enabled demo path** and **placeholder path**:
 
 - **Enabled demo path (canonical):**
@@ -73,9 +80,11 @@ Current repo includes placeholder demo folders (e.g., `/demos/attest-pipeline/pl
 ## 3) Demo manifest
 
 ### 3.1 File location
+
 Create: `demos/manifest.json` (repo root)
 
 ### 3.2 Schema (authoritative)
+
 Each top-level key is a slug. Each value is an object:
 
 ```json
@@ -100,6 +109,7 @@ Each top-level key is a slug. Each value is an object:
 ```
 
 #### Required fields
+
 - `repo` (string): `OWNER/REPO` on GitHub.
 - `ref` (string): **immutable** commit SHA (40 hex chars).
 - `outDir` (string): relative path to built artifact directory.
@@ -107,18 +117,23 @@ Each top-level key is a slug. Each value is an object:
 - `tier` (1|2|3): used by UI/tiles and later policy.
 
 #### Build command representation
+
 To keep this deterministic and shell-safe, manifest uses **argv arrays** instead of shell strings:
+
 - `build` (string[]): first build step
 - `build2` (string[]): optional second step (common: `npm run build`)
 - Later extension: allow `buildSteps: string[][]` if needed.
 
 #### Optional fields
+
 - `iframe.sandbox` (string): sandbox attribute string.
 - `iframe.allowSameOrigin` (boolean): must default `false`.
 - `budgets.maxGzipBytes` (number): gzip budget for `index.html` + assets bundle (implementation described later).
 
 ### 3.3 Validation rules
+
 A pipeline step must enforce:
+
 - `ref` must match `/^[a-f0-9]{40}$/`.
 - `repo` must match `/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/`.
 - `outDir` must not be absolute and must not traverse (`..`).
@@ -132,9 +147,11 @@ A pipeline step must enforce:
 ### 4.1 New scripts to add (repo root)
 
 #### 4.1.1 `scripts/demos-sync.mjs` (required)
+
 **Goal:** deterministically materialize enabled demos into `site/public/demos/<slug>/`.
 
 **Inputs**
+
 - Reads `demos/manifest.json`
 - Uses a local cache directory: `.cache/demos/<slug>/`
 - For each enabled demo:
@@ -145,18 +162,22 @@ A pipeline step must enforce:
   5. Copy `outDir/` → `site/public/demos/<slug>/` (delete destination first).
 
 **Determinism requirements**
+
 - No branch checkouts, only commit SHA.
 - Copy must not preserve `node_modules` or build temp.
 - Sort demos by slug to keep stable ordering.
 
 **Failure behavior**
+
 - If any enabled demo fails build or lacks `index.html`, exit non-zero.
 - If `enabled: false`, do not touch that slug folder.
 
 #### 4.1.2 `scripts/generate-demos-meta.mjs` (required)
+
 **Goal:** generate `site/public/meta/demos.json`.
 
 **Inputs**
+
 - `demos/manifest.json`
 - The set of actually staged demos under `site/public/demos/<slug>/` (post-sync)
 - Site SHA (from env `GIT_SHA` if available; fallback `unknown`)
@@ -186,18 +207,22 @@ A pipeline step must enforce:
 ```
 
 **Validation**
+
 - For each `enabled` demo, confirm `site/public/demos/<slug>/index.html` exists before writing meta.
 - Sort keys to keep deterministic output (stable JSON stringify).
 
 #### 4.1.3 `scripts/demos-budget-check.mjs` (recommended)
+
 **Goal:** enforce size budgets per demo in CI (optional to enable initially, but code should exist).
 
 **Budget math**
+
 - Define budget in **bytes**.
 - `maxGzipBytes` default: `3 * 1024 * 1024 = 3,145,728` bytes (3 MiB).
 - Compute gzip size for each artifact file and sum across demo directory, excluding `meta.json`.
 
 Pseudo:
+
 - For each file `f` in `site/public/demos/<slug>/`:
   - `gz = gzip(f).byteLength`
   - `total += gz`
@@ -208,26 +233,34 @@ Pseudo:
 ## 5) Astro shell integration (Lab Runner)
 
 ### 5.1 Update iframe sandbox defaults
+
 Current lab runner uses:
+
 - `allow-scripts allow-same-origin`
 
 This spec changes default to:
+
 - `sandbox="allow-scripts allow-forms"`
 
 **Rule:** `allow-same-origin` is prohibited by default. It may only be enabled for specific demos (from manifest `iframe.allowSameOrigin`).
 
 ### 5.2 Demo path normalization
+
 For Tier-2 demos, the canonical iframe src should be one of:
+
 - `/demos/<slug>/index.html` (preferred; explicit)
 - `/demos/<slug>/` (allowed; relies on server index, but keep consistent)
 
 **Recommendation:** Standardize to `/demos/<slug>/index.html` in `LAB_TILES` and/or computed from slug.
 
 ### 5.3 Manifest-driven policy (v1 minimal)
+
 A junior implementation can hardcode sandbox defaults now and add manifest-driven overrides later. But **the data model must be present**:
+
 - `site/public/meta/demos.json` will be used by the shell in later iterations.
 
 **Optional v1 enhancement**
+
 - Fetch `/meta/demos.json` client-side on the Lab page and use it to:
   - set sandbox string per demo
   - show “build sha” and “repo” in UI when a demo is selected
@@ -237,10 +270,13 @@ A junior implementation can hardcode sandbox defaults now and add manifest-drive
 ## 6) CI integration
 
 ### 6.1 Extend existing CI (`.github/workflows/ci.yml`)
+
 **Add a new job before `build`: `demos`**
 
 #### Job: `demos`
+
 Steps:
+
 1. Checkout `exnulla-site`
 2. Setup Node 20 with npm cache
 3. `npm ci` (root)
@@ -250,14 +286,18 @@ Steps:
 7. Upload an artifact (optional but useful): `site/public/demos` and `site/public/meta/demos.json`
 
 #### Job outputs
+
 - Must fail CI if any enabled demo fails to build or missing index.
 
 #### Build job change
+
 - Make `build` depend on `demos` (needs).
 - Ensure `npm run build` runs after demo sync/meta generation.
 
 ### 6.2 Extend deploy workflow (`.github/workflows/deploy.yml`)
+
 Before `Build (site)`:
+
 1. `npm ci` root (already)
 2. `node scripts/demos-sync.mjs`
 3. `node scripts/generate-demos-meta.mjs`
@@ -266,15 +306,18 @@ Before `Build (site)`:
 This ensures production deploy always contains demo artifacts and `/meta/demos.json`.
 
 ### 6.3 Extend Docker runtime gate (`docker-runtime-gate.yml`)
+
 The docker build must include demos, otherwise the runtime image may be missing `/meta/demos.json` and `/demos/*`.
 
 Two acceptable approaches:
 
 **Approach A (preferred): sync demos before docker build in CI**
+
 - Add Node setup + `npm ci` + `node scripts/demos-sync.mjs` + `node scripts/generate-demos-meta.mjs`
 - Then `docker build ...`
 
 **Approach B: embed demo sync into Docker build**
+
 - Add a Docker build step in `Dockerfile` that runs demo sync.
 - This is more complex (needs git + credentials, slower builds) and is not recommended for v1.
 
@@ -285,14 +328,17 @@ Two acceptable approaches:
 ## 7) Dockerfile considerations
 
 ### 7.1 Determinism
+
 - Docker build must not depend on `.git` being present.
 - `GIT_SHA` continues to be injected via build-arg:
   - `docker build --build-arg GIT_SHA="${GITHUB_SHA}" ...`
 
 ### 7.2 Demo content inclusion
+
 Since demos are copied into `site/public/demos/<slug>` before `astro build`, the resulting `site/dist/` will contain `/demos/<slug>/...` and `/meta/demos.json`.
 
 **Acceptance condition**
+
 - After building the Docker runtime image, these should be reachable:
   - `/meta/version.json` contains `GIT_SHA`
   - `/meta/demos.json` exists
@@ -305,6 +351,7 @@ Since demos are copied into `site/public/demos/<slug>` before `astro build`, the
 > These changes occur on the droplet Nginx config (not in this repo), but are required for production correctness.
 
 ### 8.1 Caching policy (recommended)
+
 - `/demos/**`:
   - if assets are hashed: long cache (e.g., 30d)
   - if not hashed: moderate cache (e.g., 1h) to reduce stale issues
@@ -324,15 +371,18 @@ location /demos/ {
 ```
 
 ### 8.2 CSP and iframe policy
+
 Goal: keep shell strict while allowing demo code inside iframes.
 
 Recommended baseline:
+
 - On shell routes:
   - `Content-Security-Policy` without `unsafe-inline` if possible (Astro inline scripts might require allowances; adjust iteratively)
 - On `/demos/`:
   - allow scripts/styles needed by demos (still prefer hashed assets)
 
 Minimum headers to add eventually:
+
 - `X-Frame-Options` should not block self-iframe (avoid `DENY`/`SAMEORIGIN` conflicts); prefer CSP `frame-ancestors`.
 - `Content-Security-Policy: frame-ancestors 'self';` on demos if needed.
 
@@ -343,9 +393,11 @@ Minimum headers to add eventually:
 ## 9) Security model for demos
 
 ### 9.1 Iframe sandbox policy
+
 Defaults:
+
 - `allow-scripts allow-forms`
-Prohibited by default:
+  Prohibited by default:
 - `allow-same-origin`
 - `allow-top-navigation`
 - `allow-popups` (unless explicitly needed)
@@ -353,11 +405,14 @@ Prohibited by default:
 Per-demo overrides allowed only through manifest.
 
 ### 9.2 Demo isolation assumptions
+
 - Demos must not attempt to access `window.top` / parent DOM.
 - Demos must not rely on shared cookies/localStorage with shell unless `allow-same-origin` is explicitly enabled (and you accept the risk).
 
 ### 9.3 Dangerous feature flags
+
 If a demo needs any of these, it must be explicitly documented in manifest and reviewed:
+
 - `allow-same-origin`
 - `allow-downloads`
 - `allow-pointer-lock`
@@ -433,6 +488,7 @@ console.log("demos-sync: ok");
 ```
 
 **Notes**
+
 - This uses `rsync` for reliable directory copying.
 - In GitHub Actions, install `rsync` if not available by default (usually present on ubuntu-latest).
 
@@ -463,7 +519,7 @@ for (const slug of Object.keys(MANIFEST).sort()) {
     artifact: `/demos/${slug}/index.html`,
     tier: cfg.tier ?? 2,
     budgets: cfg.budgets ?? {},
-    iframe: cfg.iframe ?? { sandbox: "allow-scripts allow-forms", allowSameOrigin: false }
+    iframe: cfg.iframe ?? { sandbox: "allow-scripts allow-forms", allowSameOrigin: false },
   };
 }
 
@@ -471,7 +527,7 @@ const payload = {
   generated_at: new Date().toISOString(),
   site_sha: SITE_SHA,
   manifest_path: "demos/manifest.json",
-  demos
+  demos,
 };
 
 fs.writeFileSync(outPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
@@ -483,6 +539,7 @@ console.log("generate-demos-meta: wrote", outPath);
 ## 11) Acceptance tests (must pass)
 
 ### 11.1 Local (developer machine)
+
 - `npm ci`
 - `node scripts/demos-sync.mjs` (with at least one enabled demo) succeeds.
 - `node scripts/generate-demos-meta.mjs` succeeds.
@@ -493,16 +550,19 @@ console.log("generate-demos-meta: wrote", outPath);
   - `dist/demos/<slug>/index.html`
 
 ### 11.2 CI
+
 - PR CI fails if any enabled demo cannot build.
 - PR CI fails if `site/public/meta/demos.json` is missing after generation.
 - Deploy workflow always includes demos + demos meta.
 
 ### 11.3 Docker runtime gate
+
 - `curl /meta/version.json` contains `github.sha` (existing check).
 - `curl /meta/demos.json` returns JSON containing enabled demos.
 - `curl /demos/<slug>/index.html` returns HTTP 200 for enabled demos.
 
 ### 11.4 Production (droplet + Nginx)
+
 - After atomic deploy:
   - `/meta/version.json` matches deployed commit.
   - `/meta/demos.json` matches manifest pinned SHAs.
@@ -511,11 +571,14 @@ console.log("generate-demos-meta: wrote", outPath);
 ---
 
 ## 12) Rollback procedure (deterministic)
+
 Rollback is already supported by atomic releases:
+
 - Point `current` symlink to an older release directory.
 - Reload Nginx.
 
 **Operational check**
+
 - Verify `/meta/version.json` and `/meta/demos.json` reflect the rolled-back release.
 
 ---
@@ -540,6 +603,7 @@ Rollback is already supported by atomic releases:
 ---
 
 ## 14) Notes for future expansions (v1-compatible)
+
 - Add artifact-first supply chain (zip publish per demo repo) without changing the URL contracts.
 - Add per-demo CSP or headers as needed; keep changes path-scoped (`/demos/`).
 - Add `meta.json` inside each demo artifact directory (demo-owned provenance) and surface it in `meta/demos.json`.

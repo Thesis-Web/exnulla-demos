@@ -18,7 +18,7 @@ Deliver an **interactive, deterministic sizing sandbox** for a **Class S 50 kW o
 - Provide an **order-of-magnitude radiator area estimate** using a single effective temperature.
 - Remain **static-only**: no backend calls, no secrets, no telemetry keys.
 
-This is a *portfolio demo*, not a flight design tool.
+This is a _portfolio demo_, not a flight design tool.
 
 ---
 
@@ -148,33 +148,33 @@ All inputs are local-only UI controls; they map 1:1 to the calculation model.
 
 ### 6.1 Compute configuration
 
-| Input | Key | Type | Default | Min | Max | Notes |
-|---|---|---:|---:|---:|---:|---|
-| Blocks | `blocks` | int | 4 | 1 | 8 | “Block” = repeatable compute unit |
-| GPU TDP (W) | `gpuTdp_W` | int | 700 | 300 | 1000 | Per GPU |
-| GPUs per block | `gpusPerBlock` | const int | 10 | — | — | Fixed v1 constant |
-| Host per block (kW) | `hostPerBlock_kW` | float | 1.0 | 0.5 | 2.0 | CPU+DRAM+NIC share |
-| Fixed BMC (kW) | `fixedBmc_kW` | float | 0.2 | 0.0 | 0.5 | Fixed overhead for mgmt |
+| Input               | Key               |      Type | Default | Min |  Max | Notes                             |
+| ------------------- | ----------------- | --------: | ------: | --: | ---: | --------------------------------- |
+| Blocks              | `blocks`          |       int |       4 |   1 |    8 | “Block” = repeatable compute unit |
+| GPU TDP (W)         | `gpuTdp_W`        |       int |     700 | 300 | 1000 | Per GPU                           |
+| GPUs per block      | `gpusPerBlock`    | const int |      10 |   — |    — | Fixed v1 constant                 |
+| Host per block (kW) | `hostPerBlock_kW` |     float |     1.0 | 0.5 |  2.0 | CPU+DRAM+NIC share                |
+| Fixed BMC (kW)      | `fixedBmc_kW`     |     float |     0.2 | 0.0 |  0.5 | Fixed overhead for mgmt           |
 
 ### 6.2 Power envelope
 
-| Input | Key | Type | Default | Min | Max | Notes |
-|---|---|---:|---:|---:|---:|---|
-| Bus power (kW) | `bus_kW` | const float | 50.0 | — | — | Fixed for this demo |
-| Overhead (kW) | `overhead_kW` | float | 6.0 | 2.0 | 15.0 | Non-compute: pumps, avionics, conversion, etc. |
+| Input          | Key           |        Type | Default | Min |  Max | Notes                                          |
+| -------------- | ------------- | ----------: | ------: | --: | ---: | ---------------------------------------------- |
+| Bus power (kW) | `bus_kW`      | const float |    50.0 |   — |    — | Fixed for this demo                            |
+| Overhead (kW)  | `overhead_kW` |       float |     6.0 | 2.0 | 15.0 | Non-compute: pumps, avionics, conversion, etc. |
 
 ### 6.3 Thermal / radiator
 
-| Input | Key | Type | Default | Min | Max | Notes |
-|---|---|---:|---:|---:|---:|---|
-| Effective radiator temperature (K) | `T_K` | int | 1000 | 600 | 1200 | Slider recommended |
-| Effective emissivity | `emissivity` | float | 0.85 | 0.5 | 0.95 | Single scalar (order-of-mag) |
+| Input                              | Key          |  Type | Default | Min |  Max | Notes                        |
+| ---------------------------------- | ------------ | ----: | ------: | --: | ---: | ---------------------------- |
+| Effective radiator temperature (K) | `T_K`        |   int |    1000 | 600 | 1200 | Slider recommended           |
+| Effective emissivity               | `emissivity` | float |    0.85 | 0.5 | 0.95 | Single scalar (order-of-mag) |
 
 ### 6.4 Packaging heuristic threshold
 
-| Input | Key | Type | Default | Min | Max | Notes |
-|---|---|---:|---:|---:|---:|---|
-| Area threshold (m²) | `thresholdA_m2` | float | 100 | 50 | 150 | Used in heuristic classification |
+| Input               | Key             |  Type | Default | Min | Max | Notes                            |
+| ------------------- | --------------- | ----: | ------: | --: | --: | -------------------------------- |
+| Area threshold (m²) | `thresholdA_m2` | float |     100 |  50 | 150 | Used in heuristic classification |
 
 ---
 
@@ -216,6 +216,7 @@ A_m2_per_kW = A_m2 / nodeTotal_kW
 ```
 
 **Implementation notes**
+
 - Ensure `T_K` is treated as a real number in computation (even if UI is int).
 - Guard against division by zero:
   - If `nodeTotal_kW <= 0` or `emissivity <= 0` → return `A_m2 = null` and show “—”.
@@ -237,7 +238,7 @@ When `nodeTotal_kW > bus_kW`, generate deterministic suggestions **without mutat
 2. Suggest reducing `blocks` by **1**
 3. If `hostPerBlock_kW > 0.8`, suggest lowering toward **0.8 kW**
 
-Suggestions must be shown in priority order and expressed as *recommendations*.
+Suggestions must be shown in priority order and expressed as _recommendations_.
 
 ---
 
@@ -281,6 +282,7 @@ export function computeOutputs(inputs: Inputs): Outputs;
 ```
 
 Rules:
+
 - No DOM access.
 - No reliance on global mutable state.
 - Unit-testable with snapshots.
@@ -369,6 +371,7 @@ Recommended iframe attributes:
 - Consider `csp` headers at the site level if already in place.
 
 Inside the demo, set a conservative Content Security Policy if possible via a `<meta http-equiv="Content-Security-Policy" ...>`:
+
 - `default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none';`
 
 ---
@@ -412,4 +415,4 @@ The demo’s posture intentionally mirrors the upstream documentation:
 - `space-server-heat-dissipation-main/docs/compute/compute-baseline-50kw.md`
 - `space-server-heat-dissipation-main/docs/architecture/launch-packaging-assumptions.md`
 
-These docs inform *narrative and defaults*, not runtime dependencies.
+These docs inform _narrative and defaults_, not runtime dependencies.

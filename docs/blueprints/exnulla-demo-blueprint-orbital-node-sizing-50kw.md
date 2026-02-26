@@ -272,7 +272,7 @@ type DemoState = {
   overheadkW: number;
   radiatorK: number;
   emissivity: number;
-  orbit: 'LEO' | 'GEO';
+  orbit: "LEO" | "GEO";
   arraySpecificPowerWPerKg: number;
   arrayPackingFactor: number;
 };

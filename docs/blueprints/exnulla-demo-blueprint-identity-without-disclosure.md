@@ -46,10 +46,10 @@ A minimal model aligned with the spec:
 
 ```ts
 type IdentityPredicate =
-  | 'is_unique_human'
-  | 'is_over_18'
-  | 'is_not_sanctioned'
-  | 'is_regionally_valid';
+  | "is_unique_human"
+  | "is_over_18"
+  | "is_not_sanctioned"
+  | "is_regionally_valid";
 
 interface PredicateAssertion {
   predicate: IdentityPredicate;
@@ -135,16 +135,16 @@ From `math/identity-mapping.md`:
 
 ```ts
 type Epoch = number; // integer
-type AuthorityId = 'vendor_a' | 'vendor_b';
+type AuthorityId = "vendor_a" | "vendor_b";
 
 type IdentityPredicate =
-  | 'is_unique_human'
-  | 'is_over_18'
-  | 'is_not_sanctioned'
-  | 'is_regionally_valid';
+  | "is_unique_human"
+  | "is_over_18"
+  | "is_not_sanctioned"
+  | "is_regionally_valid";
 
 type Proof = {
-  kind: 'zk_like_placeholder';
+  kind: "zk_like_placeholder";
   // deterministic placeholder fields to simulate schema validation
   statementHash: string;
   issuerSig: string;
@@ -161,12 +161,12 @@ type PredicateAssertion = {
 type VerificationResult = {
   ok: boolean;
   reason?:
-    | 'STRUCTURE_INVALID'
-    | 'EPOCH_STALE'
-    | 'ISSUER_UNKNOWN'
-    | 'PREDICATE_UNKNOWN'
-    | 'BRIDGE_DISABLED_NONLINKABLE'
-    | 'BRIDGE_OK_EQUIVALENT';
+    | "STRUCTURE_INVALID"
+    | "EPOCH_STALE"
+    | "ISSUER_UNKNOWN"
+    | "PREDICATE_UNKNOWN"
+    | "BRIDGE_DISABLED_NONLINKABLE"
+    | "BRIDGE_OK_EQUIVALENT";
 };
 ```
 

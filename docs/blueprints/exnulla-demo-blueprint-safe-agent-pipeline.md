@@ -243,7 +243,7 @@ type SafeAgentDemoState = {
 
   injection: {
     enabled: boolean;
-    where: 'none' | 'diffSummary' | 'firstFile' | 'both';
+    where: "none" | "diffSummary" | "firstFile" | "both";
     payload: string;
   };
 
@@ -261,7 +261,7 @@ type SafeAgentDemoState = {
   };
 
   ui: {
-    activeAgent: 'pipeline' | 'ThreatSketchAgent' | 'SpecLint' | 'PRSynthesis';
+    activeAgent: "pipeline" | "ThreatSketchAgent" | "SpecLint" | "PRSynthesis";
     showPromptEnvelope: boolean;
     showDiffAfterRedaction: boolean;
   };
@@ -425,8 +425,8 @@ Create a demo-local wrapper that mirrors devkit structure:
 ```ts
 type Finding = {
   id: string;
-  severity: 'info' | 'warn' | 'high';
-  category: 'structure' | 'invariant' | 'threat' | 'diff' | 'test';
+  severity: "info" | "warn" | "high";
+  category: "structure" | "invariant" | "threat" | "diff" | "test";
   claim: string;
   evidence_refs: string[];
   suggested_action?: string;

@@ -17,4 +17,6 @@ Tier-2 static iframe demos for exnulla.com.
 
 ## Integration
 
-`exnulla-site` pins a commit SHA of this repo in `demos/manifest.json`, builds at that SHA, and copies demo `dist/` into `site/public/demos/<slug>/`.
+`exnulla-site` pins a commit SHA of this repo in `demos/manifest.json`,
+builds at that SHA, and copies demo `dist/` into
+`site/public/demos/<slug>/`.

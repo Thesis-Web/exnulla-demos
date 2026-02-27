@@ -1,6 +1,8 @@
 # Demo Integration Blueprint — ExNulla Site (Static-First, Iframe-Isolated, Provenance-Stamped)
 
-**Repo:** `exnulla-site`  
+**Doc location repo:** `exnulla-demos`
+**Target repo:** `exnulla-site`
+**Canonical copy:** `exnulla-site/docs/demo-intergration-blueprint-exnulla-site-1-0-0.md`  
 **Scope:** how interactive demos are sourced, built, embedded, versioned, validated, and served without sacrificing static performance or operational simplicity.  
 **Decision locked:** **Model A — Static Artifact Embedding** (iframe + path isolation).
 

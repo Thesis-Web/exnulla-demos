@@ -2,7 +2,7 @@
 
 **Demo ID:** `identity-without-disclosure`  
 **Tier:** 2 (iframe-isolated interactive artifact)  
-**Source blueprint:** `docs/exnulla-demo-blueprint-indentity-without-disclosure.md` fileciteturn0file0  
+**Source blueprint:** `docs/exnulla-demo-blueprint-indentity-without-disclosure.md` fileciteturn0file0  
 **Integration model:** _Model A — Static Artifact Embedding_ (see `demo-integration-engineering-spec-exnulla-demos-1-0-0.md`)
 
 ---

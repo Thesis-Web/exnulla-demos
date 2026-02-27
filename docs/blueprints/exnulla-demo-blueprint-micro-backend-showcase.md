@@ -371,7 +371,7 @@ Create `site/src/content/lab/micro-backend-showcase.json` (or equivalent, based 
 
 This blueprint intentionally stops before implementation details. The engineering-specs phase should pin:
 
-- exact demo repo location (`exnulla-site/demos/micro-backend-showcase/` vs a separate repo)
+- exact demo repo location (`exnulla-demos/apps/micro-backend-showcase/` vs a separate repo)
 - Vite template choice (React vs vanilla TS) and build pipeline
 - nginx rewrite rules in the droplet:
   - `/api/signup` → backend

@@ -1,8 +1,9 @@
 # Engineering Spec — Demo Integration (Model A: Static Artifact Embedding)
 
-**Project:** `exnulla-site`  
+**Doc location repo:** `exnulla-demos`
+**Target project:** `exnulla-site`  
 **Version:** 1.0.0  
-**Source blueprint:** `docs/demo-intergration-blueprint-exnulla-site-1-0-0.md` fileciteturn0file0  
+**Source blueprint:** `docs/demo-intergration-blueprint-exnulla-site-1-0-0.md` fileciteturn0file0  
 **Scope:** Implement the end-to-end pipeline for iframe-isolated, static-built demos that are deterministically embedded into the Astro site, provenance-stamped, CI-gated, Docker-compatible, and compatible with atomic deploys.
 
 > **Design intent:** A junior engineer can implement this spec without inventing architecture. This doc includes concrete file contracts, scripts, CI jobs, and operational checks.
@@ -42,7 +43,7 @@
 
 ### 2.1 Public directory layout
 
-**Location (in this repo):** `site/public/demos/<slug>/`
+**Location (target repo: exnulla-site):** `exnulla-site/site/public/demos/<slug>/`
 
 **Canonical layout**
 

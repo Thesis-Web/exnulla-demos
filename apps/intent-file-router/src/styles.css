@@ -1,0 +1,352 @@
+:root {
+  --bg: #0b1020;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel2: rgba(255, 255, 255, 0.08);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.62);
+  --line: rgba(255, 255, 255, 0.14);
+  --accent: #7dd3fc;
+  --good: #34d399;
+  --bad: #fb7185;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --r: 14px;
+  --mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+  --sans:
+    ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 700px at 15% 10%, rgba(125, 211, 252, 0.16), transparent 50%),
+    radial-gradient(900px 600px at 85% 15%, rgba(52, 211, 153, 0.12), transparent 55%),
+    radial-gradient(900px 700px at 30% 90%, rgba(251, 113, 133, 0.08), transparent 60%), var(--bg);
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.app {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.06), transparent);
+  backdrop-filter: blur(10px);
+}
+
+.brand .title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.brand .subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.select,
+.input,
+.textarea {
+  width: 100%;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+}
+
+.select {
+  width: 320px;
+  padding: 9px 10px;
+}
+
+.input {
+  padding: 8px 10px;
+}
+
+.btn {
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  padding: 9px 12px;
+  cursor: pointer;
+  transition:
+    transform 80ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  border-color: rgba(125, 211, 252, 0.35);
+  background: rgba(125, 211, 252, 0.12);
+}
+
+.pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.pill.ok {
+  border-color: rgba(52, 211, 153, 0.35);
+  color: rgba(52, 211, 153, 0.95);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.pill.bad {
+  border-color: rgba(251, 113, 133, 0.35);
+  color: rgba(251, 113, 133, 0.95);
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  grid-template-columns: 1.1fr 1fr 0.9fr;
+}
+
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .select {
+    width: 100%;
+  }
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+}
+
+.panelHeader {
+  padding: 10px 12px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--line);
+}
+
+.row {
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.row.toggles {
+  grid-template-columns: 1fr 1fr;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.textarea {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-top: 1px solid var(--line);
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 340px;
+}
+
+.kv {
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 10px;
+}
+
+.k {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.v {
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+}
+
+.steps {
+  margin: 0;
+  padding: 10px 14px 14px 28px;
+}
+
+.stepLabel {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  overflow: auto;
+}
+
+.hint {
+  padding: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.issues {
+  list-style: none;
+  padding: 10px 12px;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.issue {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.issue.error {
+  border-color: rgba(251, 113, 133, 0.35);
+}
+
+.issue.warn {
+  border-color: rgba(125, 211, 252, 0.3);
+}
+
+.issueTop {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.issueBadge {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.issueMsg {
+  font-size: 12px;
+}
+
+.auditTitle {
+  padding: 10px 12px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.audit {
+  list-style: none;
+  padding: 8px 12px 12px;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.auditItem {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.auditAction {
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.footer {
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--muted);
+}

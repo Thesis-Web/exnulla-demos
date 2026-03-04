@@ -82,7 +82,7 @@ The _inverse_ tool (`no-target-headers.sh`) prevents accidental commits of `TARG
 
 ## 5) Demo UX (iframe layout)
 
-### 5.1 Page layout (three-pane)
+### 5.1 Page layout (four-pane, proof-forward)
 
 **Left pane — Input**
 
@@ -110,16 +110,39 @@ The _inverse_ tool (`no-target-headers.sh`) prevents accidental commits of `TARG
 **Right pane — Audit + Diff**
 
 - Audit log timeline:
-  - input_received → normalized → header_parsed → validated → payload_built → route_computed → plan_emitted
+  - input_received → normalized → header_parsed → validated → payload_built → route_computed → plan_emitted → (virtual_write)
 - Diff / preview:
   - “Original (first 5 lines)”
   - “Payload (first 5 lines)” (header removed)
   - Highlight that routing metadata does not land in repo
 
+**Bottom (or 4th pane) — Landing Areas (Virtual FS, always visible)**
+
+Purpose: make the “proof” visible. Users can see the stripped payload land in the target location.
+
+- **Two landing areas shown at all times**:
+  - Landing: `frontend/` (tree + preview)
+  - Landing: `backend/` (tree + preview)
+- Simulate performs a **virtual write** into the selected landing area:
+  - Writes are repo-relative paths (e.g., `public/data/demo.json`)
+  - The file is previewable immediately (click to open)
+- **Overwrite is explicit**:
+  - If the same target is written again, the landing file updates live.
+
+**Optional bounded .bak chain (anti-spam)**
+
+- On overwrite, preserve last N previous versions (N=2 default):
+  - `demo.json.bak1` = most recent previous
+  - `demo.json.bak2` = next previous
+  - Drop oldest if more than N
+- No timestamps (keeps the demo deterministic).
+
 ### 5.2 “Wow” affordances
 
-- **Shareable permalink**: encode the example selection + toggles (not full content) into query params.
 - **Determinism badge**: show that identical inputs yield identical routing output (hash of payload + destination).
+- **Tip + learnability**:
+  - “You can type directly into the payload.”
+  - “Change the TARGET header to route into the other landing area and watch it land.”
 
 ---
 
@@ -149,23 +172,15 @@ The _inverse_ tool (`no-target-headers.sh`) prevents accidental commits of `TARG
   - `code: string`
   - `message: string`
 
-### 6.2 Repo map (demo config)
+### 6.2 Virtual landing FS types (proof surface)
 
-Hardcode a demo map that mirrors the real script keys:
-
-```json
-{
-  "backend": "/home/deploy/repos/thesisweb-backend",
-  "frontend": "/home/deploy/repos/thesis-web-com-site",
-  "protocol": "/home/deploy/repos/the-thesis-chain-protocol",
-  "architecture": "/home/deploy/repos/the-thesis-project-architecture",
-  "devkit": "/home/deploy/repos/the-thesis-chain-ai-devkit",
-  "sims": "/home/deploy/repos/the-thesis-chain-test",
-  "portfolio": "/home/deploy/repos/thesis-portfolio"
-}
-```
-
-_Note:_ In the actual tool these are shell vars; for the demo we keep them as display-only.
+- `VirtualFS`:
+  - `frontend: Record<path, contents>`
+  - `backend: Record<path, contents>`
+- `Backups` (bounded, per file):
+  - `frontend: Record<path, string[]>` (newest first)
+  - `backend: Record<path, string[]>`
+- `LastWrite`: `{ repo: "frontend"|"backend", path: string } | null`
 
 ---
 
@@ -216,7 +231,7 @@ Expose toggles that correspond to env vars in the script:
 - `ON_CONFLICT=overwrite|skip`
 - `AFTER=move|delete|keep`
 
-This is display-only in demo (no real FS ops).
+In demo: affects plan text + virtual landing write behavior (overwrite/skip).
 
 ---
 
@@ -285,82 +300,7 @@ Expected: ignored/refused with clear reason.
 
 ---
 
-## 9) Implementation checklist (demo artifact)
-
-### 9.1 Minimal UI
-
-- [ ] Build simple three-pane layout (CSS grid).
-- [ ] File dropzone → read as text (reject if too large; cap e.g. 256KB).
-- [ ] Example loader (select sample inputs).
-- [ ] Render parse output and validation issues.
-
-### 9.2 Router core
-
-- [ ] `parseTargetHeader(firstLine) -> TargetSpec | null`
-- [ ] `validateTarget(spec, repoMap, filename, content) -> ValidationIssue[]`
-- [ ] `buildPayload(content) -> payload`
-- [ ] `computeRoutePlan(spec, repoMap, policies) -> RoutePlan`
-
-### 9.3 Audit + determinism
-
-- [ ] Emit audit steps (array of `{ts, event, details}`).
-- [ ] Compute `payload_sha256` in-browser (Web Crypto API) for the determinism badge.
-- [ ] Permalink encodes:
-  - example id
-  - policies
-  - toggles
-  - (optional) filename
-
-### 9.4 “Repo hygiene guard” mini-panel
-
-- [ ] Include a small explanation card:
-  - `no-target-headers.sh` fails if a `TARGET` header appears at line 1 inside a repo.
-- [ ] Provide a “Scan sample tree” simulated view (no real FS):
-  - user pastes a list of file paths + first lines and it flags violations.
-
----
-
-## 10) Integration points in ExNulla site (constraints)
-
-This blueprint assumes the existing ExNulla lab architecture:
-
-- Static Astro shell
-- Demo built separately (Vite or Astro-in-demo) and published as static assets
-- Embedded via iframe on `/lab/<slug>`
-
-### Recommended slug
-
-`/lab/intent-file-router`
-
-### Demo artifact path
-
-`/demos/intent-file-router/` (built dist)
-
-### Demo metadata
-
-Include `meta.json` alongside dist:
-
-- `name`, `slug`, `tier`
-- `source_repo`, `source_paths`
-- `commit_sha` (from build provenance)
-- `tags`: `["ops", "tooling", "determinism", "safety"]`
-
----
-
-## 11) Engineering-specs next (what this blueprint is setting up)
-
-The engineering specs should define:
-
-- Exact component structure (modules/files) for the demo
-- Final UI wireframes (pixel/spacing-level)
-- Route parsing + validation test vectors (table-driven)
-- Build + deploy steps into ExNulla site (CI wiring, cache busting, version stamping)
-- Accessibility + error-state behavior
-- Hard performance caps (max input size, render time)
-
----
-
-## 12) Acceptance criteria (demo is “done” when)
+## 9) Acceptance criteria (demo is “done” when)
 
 - **Correctness**
   - All supported header formats parse correctly when on line 1.
@@ -370,15 +310,16 @@ The engineering specs should define:
   - Path traversal refused.
   - Binary/media/archives refused with explicit reasons.
 - **Explainability**
-  - Audit log clearly shows each transformation.
+  - Audit log clearly shows each transformation and the virtual write.
   - Diff/preview proves routing metadata does not land in repo.
+  - Landing areas show the stripped payload at the destination path.
 - **Portfolio value**
   - A reviewer can understand the workflow in <60 seconds.
   - The demo feels deterministic and “real,” not a toy.
 
 ---
 
-## 13) Source alignment notes (to keep us honest)
+## 10) Source alignment notes (to keep us honest)
 
 This demo is intentionally aligned to the real script behaviors:
 

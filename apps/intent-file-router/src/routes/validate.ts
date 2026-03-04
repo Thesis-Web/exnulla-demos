@@ -73,7 +73,7 @@ export function validatePath(pathInRepo: string): {
 }
 
 export function validatePayloadSizeBytes(payload: string, maxBytes: number): ValidationIssue[] {
-  const bytes = Buffer.byteLength(payload, "utf8");
+  const bytes = new TextEncoder().encode(payload).length;
   if (bytes > maxBytes) {
     return [
       {

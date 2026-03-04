@@ -115,6 +115,7 @@ export const REPO_MAP: Record<string, string> = {
 ```
 
 Notes:
+
 - The demo’s landing areas only need `frontend` and `backend` to support the “split landing” proof.
 - The plan may still show other keys if desired later, but landing proof only requires two.
 
@@ -132,6 +133,7 @@ Default denylist (case-insensitive):
 - `afterPolicy`: `move | delete | keep` (default: `keep`)
 
 In demo:
+
 - `conflictPolicy` affects both plan text and virtual write behavior (skip blocks writes if file exists).
 - `afterPolicy` remains display-only.
 
@@ -186,7 +188,7 @@ export function writeVirtualFile(
   content: string,
   conflictPolicy: "overwrite" | "skip",
   virtualFS: VirtualFS,
-  backups: Backups
+  backups: Backups,
 ): { virtualFS: VirtualFS; backups: Backups; wrote: boolean; didBackup: boolean } {
   const existing = virtualFS[repo][path];
 
@@ -229,7 +231,7 @@ Show landing areas concurrently:
 ### 7.2 Tree model
 
 - Primary nodes come from `Object.keys(virtualFS[repo])`.
-- Backup nodes are *virtual*:
+- Backup nodes are _virtual_:
   - for base file `p`, expose:
     - `p.bak1` (backups[repo][p][0])
     - `p.bak2` (backups[repo][p][1])

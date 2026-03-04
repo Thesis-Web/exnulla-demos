@@ -10,6 +10,7 @@ import {
   validateRepoKey,
 } from "./validate";
 import { sha256HexUtf8 } from "./hash";
+import { applyLanding, chooseLanding } from "./landing";
 
 const MAX_BYTES = 256 * 1024;
 
@@ -70,5 +71,28 @@ export async function simulate(state: AppState): Promise<AppState> {
     afterPolicy: state.afterPolicy,
   });
 
-  return { ...state, audit, targetSpec, payload, issues, plan, payloadSha256Hex, routeId };
+  const landingId = chooseLanding(targetSpec);
+  const nextEntry = {
+    remoteDest: plan.remoteDest,
+    payload,
+    payloadSha256Hex,
+    ts: Date.now(),
+  };
+
+  const landings = {
+    ...state.landings,
+    [landingId]: applyLanding(state.landings[landingId], nextEntry, 2),
+  } as AppState["landings"];
+
+  return {
+    ...state,
+    audit,
+    targetSpec,
+    payload,
+    issues,
+    plan,
+    payloadSha256Hex,
+    routeId,
+    landings,
+  };
 }

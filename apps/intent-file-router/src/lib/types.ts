@@ -1,3 +1,5 @@
+import type { LandingEntry } from "../routes/landing";
+
 export type RepoKey =
   | "backend"
   | "frontend"
@@ -59,4 +61,6 @@ export type AppState = {
 
   payloadSha256Hex: string | null;
   routeId: string | null;
+
+  landings: { A: LandingEntry | null; B: LandingEntry | null };
 };

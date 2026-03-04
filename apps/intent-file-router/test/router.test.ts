@@ -18,6 +18,7 @@ function baseState(): AppState {
     audit: [],
     payloadSha256Hex: null,
     routeId: null,
+    landings: { A: null, B: null },
   };
 }
 

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import type { AppState, ValidationIssue } from "./lib/types";
 import { SAMPLES } from "./lib/samples";
 import { simulate } from "./routes/simulate";
+import { LandingAreas } from "./components/LandingAreas";
 
 function isoNow() {
   return new Date().toISOString();
@@ -30,6 +31,7 @@ function initialStateFromSample(sampleId: string): AppState {
     audit: [{ ts: isoNow(), action: "init", meta: { sampleId: sample.id } }],
     payloadSha256Hex: null,
     routeId: null,
+    landings: { A: null, B: null },
   };
 }
 
@@ -154,6 +156,10 @@ export function App() {
             <div className="k">Remote dest</div>
             <div className="v mono">{state.plan?.remoteDest ?? "—"}</div>
           </div>
+
+          <div className="divider" />
+
+          <LandingAreas landings={state.landings} />
 
           <div className="divider" />
 

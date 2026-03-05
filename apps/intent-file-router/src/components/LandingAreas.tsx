@@ -55,11 +55,14 @@ export function LandingAreas({ landings }: LandingAreasProps) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div>
           <div className="panelHeader">Landing A</div>
+          <div className="hint mono">// TARGET: backend docs/notes.md</div>
           <EntryView entry={landings.A} />
         </div>
 
         <div>
           <div className="panelHeader">Landing B</div>
+          <div className="hint mono">// TARGET: sims public/data/demo.json</div>
+          <div className="hint mono">// TARGET: backend landing-b/public/data/demo.json</div>
           <EntryView entry={landings.B} />
         </div>
       </div>
